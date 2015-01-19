@@ -1,6 +1,7 @@
 /*
  *   Copyright (C) 2007 Tobias Koenig <tokoe@kde.org>
  *   Copyright (C) 2010 Matthias Fuchs <mat69@gmx.net>
+ *   Copyright (C) 2015 Cameron Gray <cameron@camerongray.me>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU Library General Public License version 2 as
@@ -19,11 +20,12 @@
 
 function init()
 {
+    var url = "http://dilbert.com/strip/" + comic.identifier.toString(date.ISODate) + "/";
+
     comic.comicAuthor = "Scott Adams";
     comic.firstIdentifier = "1994-01-01";
-    comic.websiteUrl = "http://dilbert.com/strips/comic/" + comic.identifier.toString(date.ISODate) + "/";
+    comic.websiteUrl = url;
 
-    var url = "http://dilbert.com/fast/" + comic.identifier.toString(date.ISODate) + "/";
     var infos = {
         "User-Agent": "Mozilla/5.0 (compatible; Konqueror/3.5; Linux) KHTML/3.5.6 (like Gecko)",
         "Accept": "text/html, image/jpeg, image/png, text/*, image/*, */*",
@@ -34,21 +36,16 @@ function init()
         "Connection": "Keep-Alive"
     }
     
-    //if today is selected find the most current strip on the website (might also be yesterday)
-    if (comic.identifier.toString() == date.currentDate().toString()) {
-        comic.requestPage("http://dilbert.com/fast/", comic.User, infos);
-    } else {
-        comic.requestPage(url, comic.Page, infos);
-    }
+    comic.requestPage(url, comic.Page, infos);
 }
 
 function getComic(data)
 {
-    var re = new RegExp("<img src=\"(/dyn/str_strip/[0-9/]+/[0-9]+\\.strip)(\\.print)(\\.gif)\"");
+    var re = new RegExp("src=\"(http:\/\/assets.amuniversal.com\/[a-zA-Z0-9_]*)\"");
     var match = re.exec(data);
 
     if (match != null) {
-        url = "http://dilbert.com/" + match[1] + ".zoom" + match[3];
+        url = match[1];
         comic.requestPage(url, comic.Image);
     } else {
         comic.error();
@@ -57,19 +54,6 @@ function getComic(data)
 
 function pageRetrieved(id, data)
 {
-    //look at the most recent comic
-    if (id == comic.User) {
-        var re = new RegExp("<a href=\"/fast/(\\d{4}-\\d{2}-\\d{2})/\"><img src=\"/img/v1/blog/btn\\.left_arrow\\.gif\"");
-        var match = re.exec(data);
-        if (match != null) {
-            var temp = 
-            comic.lastIdentifier = date.fromString(match[1], "yyyy-MM-dd").addDays(1);//last is previous + 1
-            comic.websiteUrl = "http://dilbert.com/strips/comic/" + comic.identifier.toString(date.ISODate) + "/";
-            getComic(data);
-        } else {
-            comic.error();
-        }
-    }
     if (id == comic.Page) {
         getComic(data);
     }
