@@ -20,7 +20,7 @@
 
 function init()
 {
-    var url = "http://dilbert.com/strip/" + comic.identifier.toString(date.ISODate) + "/";
+    var url = "https://dilbert.com/strip/" + comic.identifier.toString(date.ISODate) + "/";
 
     comic.comicAuthor = "Scott Adams";
     comic.firstIdentifier = "1994-01-01";
@@ -41,11 +41,11 @@ function init()
 
 function getComic(data)
 {
-    var re = new RegExp("src=\"(http:\/\/assets.amuniversal.com\/[a-zA-Z0-9_]*)\"");
+    var re = new RegExp("src=\"(\/\/assets.amuniversal.com\/[a-zA-Z0-9_]*)\"");
     var match = re.exec(data);
 
     if (match != null) {
-        url = match[1];
+        url = "https:" + match[1];
         comic.requestPage(url, comic.Image);
     } else {
         comic.error();
